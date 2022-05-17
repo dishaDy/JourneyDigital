@@ -16,7 +16,7 @@ import com.example.journeydigital.extensions.makeGone
 import com.example.journeydigital.extensions.makeVisible
 import com.example.journeydigital.ui.`interface`.DashboardItemClickListener
 
-internal class DashboardAdapter(
+class DashboardAdapter(
     private val context: Context, private val dashboardList: ArrayList<DashboardResponse>,
     private val onClickListener: DashboardItemClickListener
 ) : RecyclerView.Adapter<DashboardAdapter.DashboardViewHolder>(),
@@ -71,7 +71,9 @@ internal class DashboardAdapter(
         val binding = RowDashboardPostBinding.bind(view)
 
     }
-
+    /**
+     * Filters query result data
+     */
     override fun getFilter(): Filter {
         return object : Filter() {
             override fun performFiltering(constraint: CharSequence?): FilterResults {
@@ -81,7 +83,7 @@ internal class DashboardAdapter(
                 } else {
                     val resultList = ArrayList<DashboardResponse>()
                     for (row in dashboardList) {
-                        if (row.title.lowercase().contains(constraint.toString().lowercase())) {
+                        if (row.title.lowercase().contains(constraint.toString().lowercase())||row.body.lowercase().contains(constraint.toString().lowercase())) {
                             resultList.add(row)
                         }
                     }

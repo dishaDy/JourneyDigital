@@ -7,13 +7,22 @@ import androidx.room.Query
 import com.example.journeydigital.data.model.DashboardResponse
 
 @Dao
-interface DashboardPostDao  {
+interface DashboardPostDao {
+    /**
+     * Get All post assencding to ID
+     */
     @Query("SELECT * FROM Post ORDER BY id ASC")
-    fun getAllPost(): List<DashboardResponse>
+     fun getAllPost(): List<DashboardResponse>
 
+    /**
+     * Insert post
+     */
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertPost(post: DashboardResponse)
+     fun insertPost(post: MutableList<DashboardResponse>)
 
-    @Query("DELETE FROM post")
-    suspend fun deleteAll()
+    /**
+     * Delete All post
+     */
+    @Query("DELETE FROM Post")
+      fun deleteAll()
 }

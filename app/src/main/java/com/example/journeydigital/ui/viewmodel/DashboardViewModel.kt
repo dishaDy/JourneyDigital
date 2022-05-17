@@ -48,7 +48,6 @@ class DashboardViewModel(private val context: Context) : ViewModel(), ApiRespons
                         response,
                         object : TypeToken<List<DashboardResponse>>() {}.type
                     )
-//                    LogUtils.logD("", "" + response.status)
                     dashboardPostResponse.value = response as MutableList<DashboardResponse>?
                 }
             }

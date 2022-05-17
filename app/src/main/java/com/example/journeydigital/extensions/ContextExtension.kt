@@ -47,36 +47,3 @@ fun Context.isNetworkStatusAvailable(): Boolean {
     return false
 }
 
-/**
- * Get color from resources
- */
-fun Context.getCompatColor(@ColorRes colorInt: Int): Int = ContextCompat.getColor(this, colorInt)
-
-/**
- * Get drawable from resources
- */
-fun Context.getCompatDrawable(@DrawableRes drawableRes: Int): Drawable? =
-    ContextCompat.getDrawable(this, drawableRes)
-
-/**
- * Toast
- */
-fun Context.toastShort(message: String) {
-    Toast.makeText(this.applicationContext, message, Toast.LENGTH_SHORT).show()
-}
-
-fun Context.toastLong(message: String) {
-    Toast.makeText(this.applicationContext, message, Toast.LENGTH_LONG).show()
-}
-
-fun Bitmap.toBase64(): String {
-    val byteArrayOutputStream = ByteArrayOutputStream()
-    this.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
-    val byteArray = byteArrayOutputStream.toByteArray()
-    return Base64.encodeToString(byteArray, Base64.DEFAULT)
-}
-
-fun String.toBitmapFromBase64(): Bitmap {
-    val decodedString: ByteArray = Base64.decode(this, Base64.DEFAULT)
-    return BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
-}

@@ -2,15 +2,15 @@ package com.example.journeydigital.ui.view.fragment
 
 import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.journeydigital.R
 import com.example.journeydigital.constants.Const
+import com.example.journeydigital.data.Database.base.RoomBase
 import com.example.journeydigital.data.model.CommentResponse
 import com.example.journeydigital.databinding.FrgDashboardDetailBinding
 import com.example.journeydigital.extensions.*
@@ -18,9 +18,12 @@ import com.example.journeydigital.ui.ViewModelFactory.DashboardDetailViewModelFa
 import com.example.journeydigital.ui.adapter.CommentsAdapter
 import com.example.journeydigital.ui.view.activity.AppMainActivity
 import com.example.journeydigital.ui.viewmodel.DashboardDetailViewModel
+import com.example.journeydigital.utills.LogUtils
+import kotlinx.coroutines.*
 
 class DashboardDetailFragment : Fragment() {
 
+    private lateinit var mDb: RoomBase
     private var _binding: FrgDashboardDetailBinding? = null
     private var title: String? = null
     private var postId: Int = 0
@@ -30,6 +33,9 @@ class DashboardDetailFragment : Fragment() {
     private val binding get() = _binding!!
     internal lateinit var context: Context
     var commentList = ArrayList<CommentResponse>()
+    private lateinit var mCommentsAdapter: CommentsAdapter
+    private val job = SupervisorJob()
+    private val coroutineScope = CoroutineScope(Dispatchers.IO + job)
 
     /**
      * Initial onCreateView
@@ -37,11 +43,15 @@ class DashboardDetailFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-
         savedInstanceState: Bundle?
     ): View? {
         _binding = FrgDashboardDetailBinding.inflate(inflater, container, false)
         val view = binding.root
+        mDb = RoomBase.getDatabase(context)
+        setHasOptionsMenu(true)
+        initViewModel()
+        observeCommentData()
+
         arguments?.let {
             postId = it.getInt(Const.postIdTag)
             title = it.getString(Const.title)
@@ -49,7 +59,22 @@ class DashboardDetailFragment : Fragment() {
         initViewModel()
         observeCommentData()
         setUpUI()
-        getComments()
+        if (requireContext().isNetworkStatusAvailable()) {
+            getComments()
+            setUpUI()
+        } else {
+            coroutineScope.launch(Dispatchers.IO) {
+                //do some background work
+                commentList.clear()
+                commentList.addAll(
+                    mDb.commentDao().getAllCommentById(postId) as ArrayList<CommentResponse>
+                )
+                withContext(Dispatchers.Main) {
+                    //Update your UI here
+                    setUpUI()
+                }
+            }
+        }
         return view
     }
 
@@ -58,7 +83,6 @@ class DashboardDetailFragment : Fragment() {
      */
     private fun setUpUI() {
         (context as AppMainActivity).setToolbarTitle(title.toString())
-        (context as AppMainActivity).setBackVisible(true)
 
         if (commentList.size > 0) {
             binding.frgDashboardDetailRvComment.makeVisible()
@@ -66,11 +90,36 @@ class DashboardDetailFragment : Fragment() {
             val layoutManager = LinearLayoutManager(activity)
             binding.frgDashboardDetailRvComment.layoutManager = layoutManager
             binding.frgDashboardDetailRvComment.itemAnimator = DefaultItemAnimator()
-            binding.frgDashboardDetailRvComment.adapter = CommentsAdapter(context, commentList)
+            mCommentsAdapter = CommentsAdapter(context, commentList)
+            binding.frgDashboardDetailRvComment.adapter = mCommentsAdapter
+
         } else {
             binding.frgDashboardDetailRvComment.makeGone()
             binding.frgDashboardDetailTvEmpty.makeVisible()
         }
+    }
+
+
+    /**
+     * Added menuitems to implement search
+     */
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.dashboard_menu, menu)
+        val search = menu.findItem(R.id.menu_search)
+        var searchView = search.actionView as SearchView
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                if (::mCommentsAdapter.isInitialized)
+                    mCommentsAdapter.filter.filter(query)
+                return false
+            }
+
+            override fun onQueryTextChange(query: String?): Boolean {
+                if (::mCommentsAdapter.isInitialized)
+                    mCommentsAdapter.filter.filter(query)
+                return false
+            }
+        })
     }
 
     override fun onAttach(context: Context) {
@@ -101,7 +150,6 @@ class DashboardDetailFragment : Fragment() {
             ViewModelProvider(this, factory).get(DashboardDetailViewModel::class.java)
     }
 
-
     /**
      * comment list api call
      */
@@ -116,8 +164,18 @@ class DashboardDetailFragment : Fragment() {
         dashboardDetailViewModel.commentData.observeOnce(
             viewLifecycleOwner,
             androidx.lifecycle.Observer {
-                commentList.addAll(it)
-                setUpUI()
+
+                coroutineScope.launch(Dispatchers.IO) {
+                    if (it != null) {
+                        mDb.commentDao().deleteAllCommentById(postId)
+                        mDb.commentDao().insertComment(it)
+                        commentList.addAll(it)
+                    }
+                    withContext(Dispatchers.Main) {
+                        setUpUI()
+                    }
+                }
+
             })
     }
 
@@ -125,13 +183,6 @@ class DashboardDetailFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> {
-                (context as AppMainActivity).onBackPressed()
-                return true
-            }
-        }
-        return false
-    }
+
+
 }

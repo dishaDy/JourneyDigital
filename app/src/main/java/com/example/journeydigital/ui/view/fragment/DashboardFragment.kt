@@ -2,10 +2,7 @@ package com.example.journeydigital.ui.view.fragment
 
 import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -21,9 +18,11 @@ import com.example.journeydigital.ui.`interface`.DashboardItemClickListener
 import com.example.journeydigital.ui.adapter.DashboardAdapter
 import com.example.journeydigital.ui.view.activity.AppMainActivity
 import com.example.journeydigital.ui.viewmodel.DashboardViewModel
+import kotlinx.coroutines.*
+
 
 class DashboardFragment : Fragment() {
-    private lateinit var db: RoomBase
+    private lateinit var mDb: RoomBase
     private lateinit var dashboardViewModel: DashboardViewModel
     private var _binding: FrgDashboardBinding? = null
     private val binding get() = _binding!!
@@ -31,6 +30,8 @@ class DashboardFragment : Fragment() {
     private lateinit var factory: DashboardViewModelFactory
     var dashboardPostList = ArrayList<DashboardResponse>()
     private lateinit var mdashboardAdapter: DashboardAdapter
+    private val job = SupervisorJob()
+    private val coroutineScope = CoroutineScope(Dispatchers.IO + job)
 
     /**
      * Initial on create view
@@ -42,13 +43,25 @@ class DashboardFragment : Fragment() {
     ): View? {
         _binding = FrgDashboardBinding.inflate(inflater, container, false)
         val view = binding.root
+        mDb = RoomBase.getDatabase(context)
+        setHasOptionsMenu(true)
         initViewModel()
         observeDashboardData()
-        setupUI()
+
         if (requireContext().isNetworkStatusAvailable()) {
             getDashboardPost()
+            setupUI()
+        } else {
+            coroutineScope.launch(Dispatchers.IO) {
+                //do some background work
+                dashboardPostList.clear()
+                dashboardPostList.addAll(mDb.postDao().getAllPost() as ArrayList<DashboardResponse>)
+                withContext(Dispatchers.Main) {
+                    //Update your UI here
+                    setupUI()
+                }
+            }
         }
-
         return view
     }
 
@@ -66,31 +79,10 @@ class DashboardFragment : Fragment() {
     }
 
     /**
-     * Function to Search posts
-     */
-    private fun searchPost() {
-        // listening to search query text change
-        (context as AppMainActivity).searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                // filter recycler view when query submitted
-                mdashboardAdapter.filter.filter(query)
-                return false
-            }
-
-            override fun onQueryTextChange(query: String?): Boolean {
-                // filter recycler view when text is changed
-                mdashboardAdapter.filter.filter(query)
-                return false
-            }
-        })
-    }
-
-    /**
      * Setting up adapter and handling click event of it
      */
     private fun setupUI() {
         (context as AppMainActivity).setToolbarTitle(getString(R.string.app_name))
-        (context as AppMainActivity).setBackVisible(false)
 
         if (dashboardPostList.size > 0) {
             binding.frgDashboardRvMain.makeVisible()
@@ -113,13 +105,29 @@ class DashboardFragment : Fragment() {
                     }
                 })
             binding.frgDashboardRvMain.adapter = mdashboardAdapter
-
         } else {
             binding.frgDashboardRvMain.makeGone()
             binding.frgDashboardTvEmpty.makeVisible()
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.dashboard_menu, menu)
+        val search = menu.findItem(R.id.menu_search)
+        var searchView   = search.actionView as SearchView
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                if (::mdashboardAdapter.isInitialized)
+                mdashboardAdapter.filter.filter(query)
+                return false
+            }
+            override fun onQueryTextChange(query: String?): Boolean {
+                if (::mdashboardAdapter.isInitialized)
+                mdashboardAdapter.filter.filter(query)
+                return false
+            }
+        })
+    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
@@ -146,12 +154,21 @@ class DashboardFragment : Fragment() {
             viewLifecycleOwner,
             androidx.lifecycle.Observer {
                 if (it != null) {
-                    dashboardPostList.addAll((it))
+                    coroutineScope.launch(Dispatchers.IO) {
+                        mDb.postDao().deleteAll()
+                        mDb.postDao().insertPost(it)
+                        dashboardPostList.addAll((it))
+
+                        withContext(Dispatchers.Main) {
+                            //Update your UI here
+                            setupUI()
+                        }
+                    }
 
                 }
-                setupUI()
-                searchPost()
+
             })
+
     }
 
     override fun onDestroyView() {

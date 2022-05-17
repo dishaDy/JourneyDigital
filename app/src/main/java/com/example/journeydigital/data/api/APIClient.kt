@@ -19,6 +19,9 @@ open class APIClient {
         interceptor.level = HttpLoggingInterceptor.Level.BODY
     }
 
+    /**
+     *  Api client
+     */
     fun getClient(): Retrofit {
         val httpClient = OkHttpClient.Builder()
         Security.insertProviderAt(Conscrypt.newProvider(), 1);

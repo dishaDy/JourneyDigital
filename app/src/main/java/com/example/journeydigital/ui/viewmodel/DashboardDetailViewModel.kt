@@ -45,7 +45,6 @@ class DashboardDetailViewModel (private val context: Context) : ViewModel(), Api
                         response,
                         object : TypeToken<List<CommentResponse>>() {}.type
                     )
-//                    LogUtils.logD("", "" + response.status)
                     commentResponse.value = response as MutableList<CommentResponse>?
                 }
             }

@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.example.journeydigital.R
 import com.example.journeydigital.databinding.ActAppMainBinding
+import com.example.journeydigital.extensions.hideToolbar
+import com.example.journeydigital.extensions.showToolbar
 import com.example.journeydigital.ui.view.fragment.DashboardDetailFragment
 import com.example.journeydigital.ui.view.fragment.DashboardFragment
 
@@ -15,7 +17,6 @@ import com.example.journeydigital.ui.view.fragment.DashboardFragment
 class AppMainActivity : AppCompatActivity(){
      lateinit var binding: ActAppMainBinding
     private val fm = supportFragmentManager
-    lateinit var searchView: SearchView
 
     /**
      * Initial onCreate method
@@ -25,27 +26,8 @@ class AppMainActivity : AppCompatActivity(){
         binding = ActAppMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+        this.showToolbar()
         pushFragment(DashboardFragment(),false)
-    }
-
-    /**
-     * Created optionMenu for search
-     */
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.dashboard_menu, menu)
-        val search = menu.findItem(R.id.menu_search)
-        searchView = search.actionView as SearchView
-        searchView.queryHint = resources.getString(R.string.search_text)
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return false
-            }
-            override fun onQueryTextChange(newText: String?): Boolean {
-//                dashboardAdapter.filter.filter(newText)
-                return true
-            }
-        })
-        return super.onCreateOptionsMenu(menu)
     }
 
     /**
