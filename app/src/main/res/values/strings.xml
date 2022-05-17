@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Journey Digital</string>
+    <string name="search_text">Search</string>
+    <string name="no_result_text">No Results</string>
+    <string name="unknown_viewmodel">Unknown ViewModel</string>
+    <string name="please_try_again">Please Try Again</string>
+    <string name="ok">Ok</string>
+    <string name="loading_text">Loading...</string>
+
+
+</resources>
