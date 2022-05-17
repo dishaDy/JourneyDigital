@@ -1,6 +1,7 @@
 package com.radian.myradianvaluations.networking
 
 import android.content.Context
+import android.text.TextUtils
 import com.example.journeydigital.R
 import com.example.journeydigital.constants.Const.baseUrl
 import com.example.journeydigital.data.api.APIClient
@@ -17,6 +18,7 @@ import retrofit2.http.*
 
 
 class ApiServiceProviderGeneric() : APIClient() {
+    private lateinit var call: Response<JsonElement>
     private val classTag = javaClass.simpleName
     private val job = SupervisorJob()
     private val coroutineScope = CoroutineScope(Dispatchers.IO + job)
@@ -29,15 +31,22 @@ class ApiServiceProviderGeneric() : APIClient() {
     fun getCall(
             context: Context,
             urlEndPoint: String,
-            returnType: ReturnType
+            returnType: ReturnType,
+            postId: String
     ) {
         coroutineScope.launch {
             try {
                 launch(Dispatchers.Main) {
                     apiResponseCallBack.onPreExecute(returnType)
                 }
-                val call = getClient().create(GetCallReference::class.java)
+                if(TextUtils.isEmpty(postId)){
+                     call = getClient().create(GetCallReference::class.java)
                         .getCall(baseUrl+ urlEndPoint)
+                }else{
+                    call = getClient().create(GetCallReference::class.java)
+                        .getCall("$baseUrl$urlEndPoint?postId=$postId")
+                }
+
                 launch(Dispatchers.Main) {
                     if (call.body() != null && call.isSuccessful) {
                         apiResponseCallBack.onSuccess(

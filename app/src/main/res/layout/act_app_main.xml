@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:background="@color/app_bg"
     android:layout_height="match_parent">
+
     <FrameLayout
         android:id="@+id/act_dashboard_frame_main"
         android:layout_width="match_parent"

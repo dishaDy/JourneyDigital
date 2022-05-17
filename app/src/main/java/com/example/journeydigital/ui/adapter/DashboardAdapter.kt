@@ -36,10 +36,10 @@ internal class DashboardAdapter(private val context: Context,private val dashboa
     }
 
     override fun getItemCount(): Int {
-        return 10
+        return dashboardList.size
     }
 
-    internal inner class DashboardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+     inner class DashboardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val binding = RowDashboardPostBinding.bind(view)
 
     }

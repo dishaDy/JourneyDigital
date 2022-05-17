@@ -5,33 +5,30 @@ import android.content.DialogInterface
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.journeydigital.R
 import com.example.journeydigital.data.api.ApiResponseCallBack
 import com.example.journeydigital.data.api.ReturnType
-import com.example.journeydigital.data.model.DashboardResponse
+import com.example.journeydigital.data.model.CommentResponse
 import com.example.journeydigital.utills.LoadingDialog
 import com.example.journeydigital.utills.LogUtils
 import com.example.journeydigital.utills.Utility
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.radian.myradianvaluations.networking.ApiServiceProviderGeneric
-import kotlinx.coroutines.launch
-import java.lang.reflect.Type
 
-class DashboardViewModel(private val context: Context) : ViewModel(), ApiResponseCallBack {
-    private var dashboardPostResponse = MutableLiveData<DashboardResponse>()
+class DashboardDetailViewModel (private val context: Context) : ViewModel(), ApiResponseCallBack {
+    private var commentResponse = MutableLiveData<CommentResponse>()
 
     private val apiServiceProviderGeneric = ApiServiceProviderGeneric(this)
 
-    val dashboardPostData: LiveData<DashboardResponse>
-        get() = dashboardPostResponse
+    val commentData: LiveData<CommentResponse>
+        get() = commentResponse
 
-    fun getDashboardPostData() {
+    fun getCommentData(postId: Int) {
         apiServiceProviderGeneric.getCall(
             context,
-            ReturnType.GET_DashboardPost.endPoint,
-            ReturnType.GET_DashboardPost,""
+            ReturnType.GET_Comment.endPoint,
+            ReturnType.GET_Comment,postId.toString()
         )
     }
 
@@ -43,13 +40,13 @@ class DashboardViewModel(private val context: Context) : ViewModel(), ApiRespons
         LoadingDialog.dismissDialog()
         try {
             when (returnType) {
-                ReturnType.GET_DashboardPost -> {
-                    val response = Gson().fromJson<DashboardResponse>(
+                ReturnType.GET_Comment -> {
+                    val response = Gson().fromJson<CommentResponse>(
                         response,
-                        object : TypeToken<DashboardResponse>() {}.type
+                        object : TypeToken<CommentResponse>() {}.type
                     )
 //                    LogUtils.logD("", "" + response.status)
-                    dashboardPostResponse.value =response
+                    commentResponse.value = response
                 }
             }
 
@@ -67,5 +64,4 @@ class DashboardViewModel(private val context: Context) : ViewModel(), ApiRespons
             context.getString(R.string.ok)
         )
     }
-
 }

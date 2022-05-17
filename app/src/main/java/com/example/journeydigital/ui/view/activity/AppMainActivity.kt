@@ -14,7 +14,7 @@ import com.example.journeydigital.ui.view.fragment.DashboardFragment
 
 class AppMainActivity : AppCompatActivity(){
     private lateinit var binding: ActAppMainBinding
-    val fm = supportFragmentManager
+    private val fm = supportFragmentManager
 
     /**
      * Initial onCreate method

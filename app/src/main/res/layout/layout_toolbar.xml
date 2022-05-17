@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:background="@color/primary"
+    android:contentInsetStart="0dp"
+    android:contentInsetLeft="0dp"
+    app:contentInsetLeft="0dp"
+    app:contentInsetStart="0dp"
+    app:popupTheme="@style/AppTheme.PopupOverlay">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/lay_toolbar_iv_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginLeft="@dimen/_10sdp"
+        android:tint="@android:color/white"
+        android:visibility="visible"
+        app:srcCompat="@drawable/ic_back"
+        android:paddingEnd="@dimen/_40sdp"
+        android:paddingRight="@dimen/_40sdp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/lay_toolbar_tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:text="abc"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_16sdp"
+            android:visibility="visible" />
+
+
+    </RelativeLayout>
+
+</androidx.appcompat.widget.Toolbar>
