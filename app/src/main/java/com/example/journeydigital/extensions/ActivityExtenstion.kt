@@ -31,6 +31,11 @@ fun AppCompatActivity.setToolbarTitle(title: String) {
     this.supportActionBar?.title = title
 }
 
+fun AppCompatActivity.setBackVisible(isVisible: Boolean) {
+    this.supportActionBar?.setDisplayHomeAsUpEnabled(isVisible)
+}
+
+
 /**
  * Hide Keyboard
  */

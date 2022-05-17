@@ -13,8 +13,9 @@ import com.example.journeydigital.ui.view.fragment.DashboardFragment
 
 
 class AppMainActivity : AppCompatActivity(){
-    private lateinit var binding: ActAppMainBinding
+     lateinit var binding: ActAppMainBinding
     private val fm = supportFragmentManager
+    lateinit var searchView: SearchView
 
     /**
      * Initial onCreate method
@@ -33,7 +34,7 @@ class AppMainActivity : AppCompatActivity(){
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.dashboard_menu, menu)
         val search = menu.findItem(R.id.menu_search)
-        val searchView = search.actionView as SearchView
+        searchView = search.actionView as SearchView
         searchView.queryHint = resources.getString(R.string.search_text)
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {

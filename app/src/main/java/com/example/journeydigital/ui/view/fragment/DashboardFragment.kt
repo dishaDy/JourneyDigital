@@ -3,8 +3,10 @@ package com.example.journeydigital.ui.view.fragment
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -28,11 +30,10 @@ class DashboardFragment : Fragment() {
     internal lateinit var context: Context
     private lateinit var factory: DashboardViewModelFactory
     var dashboardPostList = ArrayList<DashboardResponse>()
-
-
+    private lateinit var mdashboardAdapter: DashboardAdapter
 
     /**
-     * Initial oncreate view
+     * Initial on create view
      */
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,13 +42,13 @@ class DashboardFragment : Fragment() {
     ): View? {
         _binding = FrgDashboardBinding.inflate(inflater, container, false)
         val view = binding.root
-        db=RoomBase.getDatabase(context)
         initViewModel()
         observeDashboardData()
         setupUI()
         if (requireContext().isNetworkStatusAvailable()) {
             getDashboardPost()
         }
+
         return view
     }
 
@@ -65,19 +66,40 @@ class DashboardFragment : Fragment() {
     }
 
     /**
+     * Function to Search posts
+     */
+    private fun searchPost() {
+        // listening to search query text change
+        (context as AppMainActivity).searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                // filter recycler view when query submitted
+                mdashboardAdapter.filter.filter(query)
+                return false
+            }
+
+            override fun onQueryTextChange(query: String?): Boolean {
+                // filter recycler view when text is changed
+                mdashboardAdapter.filter.filter(query)
+                return false
+            }
+        })
+    }
+
+    /**
      * Setting up adapter and handling click event of it
      */
     private fun setupUI() {
         (context as AppMainActivity).setToolbarTitle(getString(R.string.app_name))
-//        (context as AppMainActivity).binding.layoutToolbar.layToolbarTvTitle.text =
-//            getString(R.string.app_name)
+        (context as AppMainActivity).setBackVisible(false)
+
         if (dashboardPostList.size > 0) {
             binding.frgDashboardRvMain.makeVisible()
             binding.frgDashboardTvEmpty.makeGone()
             val layoutManager = LinearLayoutManager(activity)
             binding.frgDashboardRvMain.layoutManager = layoutManager
             binding.frgDashboardRvMain.itemAnimator = DefaultItemAnimator()
-            binding.frgDashboardRvMain.adapter =
+
+            mdashboardAdapter =
                 DashboardAdapter(context, dashboardPostList, object :
                     DashboardItemClickListener {
                     override fun dashboardItemClicked(position: Int, actionType: String) {
@@ -90,11 +112,23 @@ class DashboardFragment : Fragment() {
                         )
                     }
                 })
+            binding.frgDashboardRvMain.adapter = mdashboardAdapter
+
         } else {
             binding.frgDashboardRvMain.makeGone()
             binding.frgDashboardTvEmpty.makeVisible()
         }
+    }
 
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                (context as AppMainActivity).onBackPressed()
+                return true
+            }
+        }
+        return false
     }
 
     /**
@@ -111,12 +145,12 @@ class DashboardFragment : Fragment() {
         dashboardViewModel.dashboardPostData.observeOnce(
             viewLifecycleOwner,
             androidx.lifecycle.Observer {
-                dashboardPostList.addAll(listOf(it))
-//                if(it!=null)
-//                {
-//                    db.postDao().insertPost(it)
-//                }
-                binding.frgDashboardRvMain.adapter?.notifyDataSetChanged()
+                if (it != null) {
+                    dashboardPostList.addAll((it))
+
+                }
+                setupUI()
+                searchPost()
             })
     }
 

@@ -20,11 +20,11 @@ import kotlinx.coroutines.launch
 import java.lang.reflect.Type
 
 class DashboardViewModel(private val context: Context) : ViewModel(), ApiResponseCallBack {
-    private var dashboardPostResponse = MutableLiveData<DashboardResponse>()
+    private var dashboardPostResponse = MutableLiveData<MutableList<DashboardResponse>>()
 
     private val apiServiceProviderGeneric = ApiServiceProviderGeneric(this)
 
-    val dashboardPostData: LiveData<DashboardResponse>
+    val dashboardPostData: MutableLiveData<MutableList<DashboardResponse>>
         get() = dashboardPostResponse
 
     fun getDashboardPostData() {
@@ -44,12 +44,12 @@ class DashboardViewModel(private val context: Context) : ViewModel(), ApiRespons
         try {
             when (returnType) {
                 ReturnType.GET_DashboardPost -> {
-                    val response = Gson().fromJson<DashboardResponse>(
+                    val response = Gson().fromJson<List<DashboardResponse>>(
                         response,
-                        object : TypeToken<DashboardResponse>() {}.type
+                        object : TypeToken<List<DashboardResponse>>() {}.type
                     )
 //                    LogUtils.logD("", "" + response.status)
-                    dashboardPostResponse.value =response
+                    dashboardPostResponse.value = response as MutableList<DashboardResponse>?
                 }
             }
 

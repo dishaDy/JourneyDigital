@@ -17,11 +17,11 @@ import com.google.gson.reflect.TypeToken
 import com.radian.myradianvaluations.networking.ApiServiceProviderGeneric
 
 class DashboardDetailViewModel (private val context: Context) : ViewModel(), ApiResponseCallBack {
-    private var commentResponse = MutableLiveData<CommentResponse>()
+    private var commentResponse = MutableLiveData<MutableList<CommentResponse>>()
 
     private val apiServiceProviderGeneric = ApiServiceProviderGeneric(this)
 
-    val commentData: LiveData<CommentResponse>
+    val commentData: MutableLiveData<MutableList<CommentResponse>>
         get() = commentResponse
 
     fun getCommentData(postId: Int) {
@@ -41,12 +41,12 @@ class DashboardDetailViewModel (private val context: Context) : ViewModel(), Api
         try {
             when (returnType) {
                 ReturnType.GET_Comment -> {
-                    val response = Gson().fromJson<CommentResponse>(
+                    val response = Gson().fromJson<List<CommentResponse>>(
                         response,
-                        object : TypeToken<CommentResponse>() {}.type
+                        object : TypeToken<List<CommentResponse>>() {}.type
                     )
 //                    LogUtils.logD("", "" + response.status)
-                    commentResponse.value = response
+                    commentResponse.value = response as MutableList<CommentResponse>?
                 }
             }
 
