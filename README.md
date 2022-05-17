@@ -5,7 +5,7 @@
 
 - Display list of posts with search functionality
 - Display the post details and its comments with search functionality
-- Add offline supports
+- Added offline supports
 
 ## Tech components
 
@@ -16,7 +16,12 @@
 - Coroutine
 - Retrofit
 - OkHttp
--  Viewbinding
+- Viewbinding
 - LifeCycle Component
 - Git
 -RxAndroid and Rxjava
+
+## TODO Tasks
+
+- Test cases
+- Documentation generation using Dokka (https://github.com/Kotlin/dokka/blob/master/README.md)
